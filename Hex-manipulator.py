@@ -10,7 +10,7 @@ from tkinter import filedialog    # needed for linux
 import tkinter.font as tkFont
 import tkinter.ttk as ttk
 import tkinter.messagebox
-
+import os
 #test git26-jul-2019 23:48
 #test2 git27-jul-19 0:51
 
@@ -23,7 +23,7 @@ class McListBox(object):
     def _setup_widgets(self):
         container = ttk.Frame(f1)
         #container.pack()#fill='both', expand=True)
-        container.grid(row=10)
+        container.grid(row=10, column=root.a, columnspan=2, sticky='wens', padx=0, pady=0)
         # create a treeview with dual scrollbars
         self.tree = ttk.Treeview(columns=tbl_header, show="headings")
         vsb = ttk.Scrollbar(orient="vertical",
@@ -51,21 +51,20 @@ class McListBox(object):
                 if self.tree.column(tbl_header[ix],width=None)<col_w:
                     self.tree.column(tbl_header[ix], width=col_w)
 
-#-------------------- Styling tabs --------------------#
-# style = ttk.Style()
-# style.theme_create( "MyStyle", parent="alt", settings={
-#         "TNotebook": {"configure": {"tabmargins": [2, 5, 2, 0] } },
-#         "TNotebook.Tab": {"configure": {"padding": [100, 100] },}})
-#
-# style.theme_use("MyStyle")
 #-------------------- the test data --------------------#
-tbl_header = ['First part', 'Data', 'Checksum']
-tbl_list = [
+tbl_header1 = ['First part', 'Data', 'Checksum']
+tbl_list1 = [
 (':02000004', '0000', 'FA') ,
 (':10000000','18F09FE518F09FE518F09FE518F09FE5', 'C0'),
 (':10001000','18F09FE50000A0E120F11FE518F09FE5', '32')
 ]
 
+tbl_header2 = ['First part', 'Data', 'Checksum']
+tbl_list2 = [
+(':02000005', '0000', 'FB') ,
+(':10000000','18F09FE518F09FE518F09FE518F09FE5', 'C02'),
+(':10001000','18F09FE50000A0E120F11FE518F09FE5', '32B')
+]
 
 #-------------------- Main window --------------------#
 root = tk.Tk()
@@ -80,10 +79,14 @@ def dirDialog():
     currdir = os.getcwd()
     tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title= 'Please select a directory where the new files will be saved')
     if len(tempdir) > 0:
-        print("You choose %s") % tempdir
+        if tempdir != '':
+            pathNewHx.delete(0,END)
+            pathNewHx.insert(0,tempdir)
 def fileDialog():
     filename = filedialog.askopenfilename()
-    pathlabel.config(text=filename)
+    if filename != '':
+        pathMaster.delete(0,END)
+        pathMaster.insert(0,filename)
 def popmsg():
     print("file saved!")
 #-------------------- Menu --------------------#
@@ -117,24 +120,36 @@ n.add(f2, text ='Verificator')
 folderpic = PhotoImage(file="folder.png")
 mhfp = Label(f1, text='Master hex file path', bg='#a89999', fg='white')
 mhfp.grid(row=0, sticky=W)
-pathMaster = Entry(f1, width=80)
+pathMaster = Entry(f1, width=55)
 pathMaster.grid(row=1, sticky=W)
 ButtonLMF = Button(f1, compound=TOP, width=30, height=20, image=folderpic, command=fileDialog)   #Load master file button
-ButtonLMF.grid(row=1, column=1)
+ButtonLMF.grid(row=1, column=1, sticky=E)
 #----------- Labels/Buttons Destination -----------#
-# mhfp = Label(f1, text='Folder for new hex file', bg='#5e5', fg='#000')
-# mhfp.grid(row=0)
-#
-# ButtonST = Button(f1, text="Save to Folder", fg='red', command=dirDialog)   #Genarate new button
-# ButtonGN = Button(f1, text="Generate new", fg='red')   #Genarate new button
-# ButtonSV = Button(f1, text="Save", fg='#62674b', command=popmsg)   #Save genarated file
-#
-# ButtonST.grid(row=1)
-# ButtonGN.grid(row=2)
-# ButtonSV.grid(row=3)
+f1.grid_columnconfigure(2, minsize=40)
+FNH = Label(f1, text='Folder for new hex file', bg='#5e5', fg='#000')
+FNH.grid(row=0, column=3, sticky=W)
+pathNewHx = Entry(f1, width=55)
+pathNewHx.grid(row=1, column=3, sticky=W)
+ButtonST = Button(f1, text="Save to Folder", fg='red', width=30, height=20, image=folderpic, command=dirDialog)   #Genarate new button
+ButtonGN = Button(f1, text="Generate New", fg='red')   #Genarate new button
+ButtonSV = Button(f1, text="Save", fg='#62674b', command=popmsg)   #Save genarated file
+
+ButtonST.grid(row=1, column=4, sticky=E)
+ButtonGN.grid(row=2, column=3)
+ButtonSV.grid(row=2, column=4)
 
 #----------- Table data -----------#
-mc_listbox = McListBox()
+root.a = 0
+tbl_list = tbl_list1
+tbl_header = tbl_header1
+mc_listbox = McListBox()               # Create a table for the source HEX
+
+tbl_list = tbl_list2
+tbl_header = tbl_header2
+root.a = 3
+DH_listbox = McListBox()               # Create a table for the source HEX
+
+
 n.pack(expand=1, fill='both')          # add tabs
 
 def handle_tab_changed(event):                           # return which tab is activated
