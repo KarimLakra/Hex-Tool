@@ -11,8 +11,7 @@ import tkinter.font as tkFont
 import tkinter.ttk as ttk
 import tkinter.messagebox
 import os
-#test git26-jul-2019 23:48
-#test2 git27-jul-19 0:51
+
 
 class McListBox(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
@@ -23,7 +22,7 @@ class McListBox(object):
     def _setup_widgets(self):
         container = ttk.Frame(f1)
         #container.pack()#fill='both', expand=True)
-        container.grid(row=10, column=root.a, columnspan=2, sticky='wens', padx=0, pady=0)
+        container.grid(row=10, column=root.a, columnspan=6, sticky='wens', padx=0, pady=0)
         # create a treeview with dual scrollbars
         self.tree = ttk.Treeview(columns=tbl_header, show="headings")
         vsb = ttk.Scrollbar(orient="vertical",
@@ -118,35 +117,81 @@ n.add(f2, text ='Verificator')
 
 #----------- Labels/Buttons Source -----------#
 folderpic = PhotoImage(file="folder.png")
-mhfp = Label(f1, text='Master hex file path', bg='#a89999', fg='white')
+mhfp = Label(f1, text='Source hex file path', bg='#a89999', fg='white')
 mhfp.grid(row=0, sticky=W)
-pathMaster = Entry(f1, width=55)
-pathMaster.grid(row=1, sticky=W)
-ButtonLMF = Button(f1, compound=TOP, width=30, height=20, image=folderpic, command=fileDialog)   #Load master file button
-ButtonLMF.grid(row=1, column=1, sticky=E)
-#----------- Labels/Buttons Destination -----------#
-f1.grid_columnconfigure(2, minsize=40)
-FNH = Label(f1, text='Folder for new hex file', bg='#5e5', fg='#000')
-FNH.grid(row=0, column=3, sticky=W)
-pathNewHx = Entry(f1, width=55)
-pathNewHx.grid(row=1, column=3, sticky=W)
-ButtonST = Button(f1, text="Save to Folder", fg='red', width=30, height=20, image=folderpic, command=dirDialog)   #Genarate new button
-ButtonGN = Button(f1, text="Generate New", fg='red')   #Genarate new button
-ButtonSV = Button(f1, text="Save", fg='#62674b', command=popmsg)   #Save genarated file
 
-ButtonST.grid(row=1, column=4, sticky=E)
-ButtonGN.grid(row=2, column=3)
-ButtonSV.grid(row=2, column=4)
+pathSource = Entry(f1, width=55)
+pathSource.grid(row=1, columnspan=5, sticky=W)
+ButtonLMF = Button(f1, compound=TOP, width=30, height=20, image=folderpic, command=fileDialog)   #Load master file button
+ButtonLMF.grid(row=1, column=5, sticky=E)
+
+HOS = Label(f1, text='Source serial')
+HOS.grid(row=2, column=0, sticky=W)
+
+f1.grid_columnconfigure(1, minsize=3)
+
+SoS = Label(f1, text='Hex of serial Source')
+SoS.grid(row=2, column=2, sticky=W)
+
+#f1.grid_columnconfigure(3, minsize=3)
+serialSource = Entry(f1)#, width=55)
+serialSource.grid(row=3, sticky=W)
+HOS = Label(f1, text='HexSourceHolder', relief=SUNKEN, width=30)
+HOS.grid(row=3, column=2, sticky=W)
+
+SMA = Label(f1, text='Source MAC address')
+SMA.grid(row=4, column=0, sticky=W)
+MACSource = Entry(f1)#, width=55)
+MACSource.grid(row=5, sticky=W)
+
+f1.grid_rowconfigure(6, minsize=15)
+
+ButtonLS = Button(f1, text="Load Source HEX", width=15, height=2)
+ButtonLS.grid(row=7, column=0, sticky=W)
+
+f1.grid_rowconfigure(8, minsize=15)
+#----------- Labels/Buttons Destination -----------#
+f1.grid_columnconfigure(6, minsize=60)
+FNH = Label(f1, text='Destination Hex file', bg='#5e5', fg='#000')
+FNH.grid(row=0, column=7, sticky=W)
+pathNewHx = Entry(f1, width=55)
+pathNewHx.grid(row=1, column=7, columnspan=5, sticky=W)
+ButtonST = Button(f1, text="Save to Folder", fg='red', width=30, height=20, image=folderpic, command=dirDialog)   #Genarate new button
+
+DS = Label(f1, text='Destination serial')
+DS.grid(row=2, column=7, sticky=W)
+
+f1.grid_columnconfigure(8, minsize=3)
+
+SoS = Label(f1, text='Hex of serial Destination')
+SoS.grid(row=2, column=9, sticky=W)
+
+serialDestination = Entry(f1)
+serialDestination.grid(row=3, column=7, sticky=W)
+HOS = Label(f1, text='HexDestinationHolder', relief=SUNKEN, width=30)
+HOS.grid(row=3, column=9, sticky=W)
+
+DMA = Label(f1, text='Destination MAC address')
+DMA.grid(row=4, column=7, sticky=W)
+MACDestination = Entry(f1)#, width=55)
+MACDestination.grid(row=5, column=7, sticky=W)
+
+ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2)   #Genarate new button
+ButtonSV = Button(f1, text="Save", fg='#62674b', command=popmsg, width=15, height=2)   #Save genarated file
+
+ButtonST.grid(row=1, column=12, sticky=E)
+ButtonGN.grid(row=7, column=7, sticky=W)
+ButtonSV.grid(row=7, column=9)
 
 #----------- Table data -----------#
-root.a = 0
+root.a = 0                             # variable to pass to the class for positioning the table
 tbl_list = tbl_list1
 tbl_header = tbl_header1
 mc_listbox = McListBox()               # Create a table for the source HEX
 
 tbl_list = tbl_list2
 tbl_header = tbl_header2
-root.a = 3
+root.a = 7
 DH_listbox = McListBox()               # Create a table for the source HEX
 
 
