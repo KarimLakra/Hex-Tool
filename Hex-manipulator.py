@@ -11,7 +11,7 @@ import tkinter.font as tkFont
 import tkinter.ttk as ttk
 import tkinter.messagebox
 import os
-
+import hexAnalyzer
 
 class McListBox(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
@@ -53,16 +53,14 @@ class McListBox(object):
 #-------------------- the test data --------------------#
 tbl_header1 = ['First part', 'Data', 'Checksum']
 tbl_list1 = [
-(':02000004', '0000', 'FA') ,
-(':10000000','18F09FE518F09FE518F09FE518F09FE5', 'C0'),
-(':10001000','18F09FE50000A0E120F11FE518F09FE5', '32')
+('','', ''),
+('','', '')
 ]
 
 tbl_header2 = ['First part', 'Data', 'Checksum']
 tbl_list2 = [
-(':02000005', '0000', 'FB') ,
-(':10000000','18F09FE518F09FE518F09FE518F09FE5', 'C02'),
-(':10001000','18F09FE50000A0E120F11FE518F09FE5', '32B')
+('','', ''),
+('','', '')
 ]
 
 #-------------------- Main window --------------------#
@@ -70,6 +68,8 @@ root = tk.Tk()
 root.wm_title("Hex files tool")
 root.geometry("1400x600")
 
+root.Flines = ""    # Loads Source file
+#-------------------- Functions --------------------#
 def quitfunc():
     quit()
 def popAbout():
@@ -84,10 +84,69 @@ def dirDialog():
 def fileDialog():
     filename = filedialog.askopenfilename()
     if filename != '':
-        pathMaster.delete(0,END)
-        pathMaster.insert(0,filename)
-def popmsg():
-    print("file saved!")
+        pathSource.delete(0,END)
+        pathSource.insert(0,filename)
+
+def loadLines():
+    x = serialSource.get()
+    a = "".join([hex(ord(c))[2:].zfill(2) for c in x])
+    label_var_HOS.set(a)
+
+    fp=open(pathSource.get())
+    root.Flines=fp.readlines()
+
+    a = root.Flines[14009].strip()    #get lines to modify and remove whitespaces
+    b = root.Flines[28907].strip()
+
+    def prepareLine(va):
+        L1L = len(va)
+        dt = (va[:9], va[9:(L1L-11)+9],va[-2:])
+        return dt
+
+    L1 = prepareLine(a)
+    L2 = prepareLine(b)
+    modiflines = (L1, L2)
+
+    rwsList1 = SH_listbox.tree.get_children()
+    for i in rwsList1:
+        SH_listbox.tree.delete(i)
+    for x in range(3):
+        SH_listbox.tree.column(x,width=99)
+
+    count = 1
+    for item in modiflines:
+        SH_listbox.tree.insert('', '0', values=(modiflines[count][0],modiflines[count][1],modiflines[count][2]))
+
+        for ix, val in enumerate(item):
+            col_w = tkFont.Font().measure(val)
+            if SH_listbox.tree.column(tbl_header1[ix],width=None)<col_w:
+                SH_listbox.tree.column(tbl_header1[ix], width=col_w)
+        count -= 1
+def generatHex():
+    print('generated!')
+def SaveToHex():
+    if root.Flines != "":
+        SaveToHex = os.path.join(pathNewHx.get(), serialDestination.get()+".hex")
+        fo = open(SaveToHex, "w+")
+        for i in range(len(root.Flines)):
+            if i == 14009 :
+                print(root.Flines[i])
+                fo.write(root.Flines[i])
+            elif i == 28907:
+                print(root.Flines[i])
+                fo.write(root.Flines[i])
+            else:
+                fo.write(root.Flines[i])
+        fo.close()
+
+
+    else:
+        print("Please load the source Hex file first")
+
+#def StringToHex():
+def analyzerHEX():
+    print('Nothing')
+
 #-------------------- Menu --------------------#
 menu = Menu(root)
 root.config(menu=menu)
@@ -122,6 +181,8 @@ mhfp.grid(row=0, sticky=W)
 
 pathSource = Entry(f1, width=55)
 pathSource.grid(row=1, columnspan=5, sticky=W)
+# pathSource.delete(0,END)
+pathSource.insert(0,'/home/kardes/Tests/Python/hex/CE13007 MAC 1e306ca24747 MASTER.hex')
 ButtonLMF = Button(f1, compound=TOP, width=30, height=20, image=folderpic, command=fileDialog)   #Load master file button
 ButtonLMF.grid(row=1, column=5, sticky=E)
 
@@ -136,17 +197,21 @@ SoS.grid(row=2, column=2, sticky=W)
 #f1.grid_columnconfigure(3, minsize=3)
 serialSource = Entry(f1)#, width=55)
 serialSource.grid(row=3, sticky=W)
-HOS = Label(f1, text='HexSourceHolder', relief=SUNKEN, width=30)
+serialSource.insert(0, 'CE13007')
+label_var_HOS = tk.StringVar() #update label text holder
+label_var_HOS.set("")
+HOS = Label(f1, text='HexSourceHolder', relief=SUNKEN, width=30, textvariable = label_var_HOS)
 HOS.grid(row=3, column=2, sticky=W)
 
 SMA = Label(f1, text='Source MAC address')
 SMA.grid(row=4, column=0, sticky=W)
 MACSource = Entry(f1)#, width=55)
 MACSource.grid(row=5, sticky=W)
+MACSource.insert(0, '1E306CA24747')
 
 f1.grid_rowconfigure(6, minsize=15)
 
-ButtonLS = Button(f1, text="Load Source HEX", width=15, height=2)
+ButtonLS = Button(f1, text="Load Source HEX", width=15, height=2, command=lambda:loadLines())
 ButtonLS.grid(row=7, column=0, sticky=W)
 
 f1.grid_rowconfigure(8, minsize=15)
@@ -156,6 +221,7 @@ FNH = Label(f1, text='Destination Hex file', bg='#5e5', fg='#000')
 FNH.grid(row=0, column=7, sticky=W)
 pathNewHx = Entry(f1, width=55)
 pathNewHx.grid(row=1, column=7, columnspan=5, sticky=W)
+pathNewHx.insert(0,'/home/kardes/Tests/Python/hex/HexFilesTest')
 ButtonST = Button(f1, text="Save to Folder", fg='red', width=30, height=20, image=folderpic, command=dirDialog)   #Genarate new button
 
 DS = Label(f1, text='Destination serial')
@@ -168,6 +234,7 @@ SoS.grid(row=2, column=9, sticky=W)
 
 serialDestination = Entry(f1)
 serialDestination.grid(row=3, column=7, sticky=W)
+serialDestination.insert(0, 'CE16937')
 HOS = Label(f1, text='HexDestinationHolder', relief=SUNKEN, width=30)
 HOS.grid(row=3, column=9, sticky=W)
 
@@ -175,9 +242,10 @@ DMA = Label(f1, text='Destination MAC address')
 DMA.grid(row=4, column=7, sticky=W)
 MACDestination = Entry(f1)#, width=55)
 MACDestination.grid(row=5, column=7, sticky=W)
+MACDestination.insert(0, '1E306CA26097')
 
-ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2)   #Genarate new button
-ButtonSV = Button(f1, text="Save", fg='#62674b', command=popmsg, width=15, height=2)   #Save genarated file
+ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2, command=generatHex)   #Genarate new button
+ButtonSV = Button(f1, text="Save", fg='#62674b', command=SaveToHex, width=15, height=2)   #Save genarated file
 
 ButtonST.grid(row=1, column=12, sticky=E)
 ButtonGN.grid(row=7, column=7, sticky=W)
@@ -187,7 +255,7 @@ ButtonSV.grid(row=7, column=9)
 root.a = 0                             # variable to pass to the class for positioning the table
 tbl_list = tbl_list1
 tbl_header = tbl_header1
-mc_listbox = McListBox()               # Create a table for the source HEX
+SH_listbox = McListBox()               # Create a table for the source HEX
 
 tbl_list = tbl_list2
 tbl_header = tbl_header2
