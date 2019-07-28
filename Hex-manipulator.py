@@ -14,6 +14,18 @@ import os
 import hexLineAnalyzer
 import random
 
+
+#-------------------- Main window --------------------#
+root = tk.Tk()
+root.wm_title("Hex files tool")
+root.geometry("1450x600")
+
+root.Flines = ""    # Loads Source file
+
+label_var_InfoLines = tk.StringVar() #update label text holder
+
+label_var_InfoLines.set("Double Click a line from destination \nHex to analyze")
+
 class McListBox(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
     def __init__(self):
@@ -45,11 +57,25 @@ class McListBox(object):
                 width=tkFont.Font().measure(col.title()))
         for item in tbl_list:
             self.tree.insert('', 'end', values=item)
+            self.tree.bind("<Double-1>", self.OnDoubleClick)
             # adjust column's width if necessary to fit each value
             for ix, val in enumerate(item):
                 col_w = tkFont.Font().measure(val)
                 if self.tree.column(tbl_header[ix],width=None)<col_w:
                     self.tree.column(tbl_header[ix], width=col_w)
+    def OnDoubleClick(self, event):
+        item = self.tree.identify('item', event.x, event.y)
+        global label_var_InfoLines
+        a = self.tree.item(item,"values")
+        if a[0] != '':
+            b = hexLineAnalyzer.checLine(a[0]+a[1]+a[2])
+            if b[0] == '':
+                err = 'No Error'
+            c = "Byte count: "+b[2] +"\nAddress: "+b[1]+"\nRecord type: "+b[3]+"\nChecksum from line:" \
+            +b[5]+"\nCalculated Checksum: "+b[6]+"\n\n"+ err
+            label_var_InfoLines.set(c)
+
+
 
 #-------------------- the test data --------------------#
 tbl_header1 = ['First part', 'Data', 'Checksum']
@@ -64,12 +90,7 @@ tbl_list2 = [
 ('','', '')
 ]
 
-#-------------------- Main window --------------------#
-root = tk.Tk()
-root.wm_title("Hex files tool")
-root.geometry("1400x600")
 
-root.Flines = ""    # Loads Source file
 #-------------------- Functions --------------------#
 def quitfunc():
     quit()
@@ -134,12 +155,12 @@ def loadLines(s,l,fo,lb, rw):
     count = 1                                  # counter to decrement to insert rows in treeView
     for item in modiflines:
         lb.tree.insert('', '0', values=(modiflines[count][0],modiflines[count][1],modiflines[count][2]))
-
         for ix, val in enumerate(item):        # adjust columns width to fit new data
             col_w = tkFont.Font().measure(val)
             if lb.tree.column(tbl_header1[ix],width=None)<col_w:
                 lb.tree.column(tbl_header1[ix], width=col_w)
         count -= 1
+
     rslt = (L1,L2)
     return  rslt                               # return Lines to modify
 
@@ -201,10 +222,6 @@ def SaveToHex():
 
     else:
         print("Please load the source Hex file first")
-
-#def StringToHex():
-def analyzerHEX():
-    print('Nothing')
 
 #-------------------- Menu --------------------#
 menu = Menu(root)
@@ -336,6 +353,10 @@ def handle_tab_changed(event):                           # return which tab is a
         label_var.set('Verificator')
 
 n.bind("<<NotebookTabChanged>>", handle_tab_changed)    # detects the active tab
+#-------------------- Info right bar --------------------#
+
+InfoLines = Label(f1, relief=SUNKEN, width=30, textvariable = label_var_InfoLines, anchor=W, justify=LEFT)
+InfoLines.grid(row=10, column=13, sticky=W+N+E)
 
 #-------------------- Status bar --------------------#
 statusFrame = Frame(root)
@@ -345,4 +366,5 @@ label_status.set("status bar")
 status = Label(statusFrame, relief=SUNKEN, anchor=W, textvariable = label_status)
 status.pack(fill=X)
 
+# if __name__ == "--main__":
 root.mainloop()
