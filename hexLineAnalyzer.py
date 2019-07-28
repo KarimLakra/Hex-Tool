@@ -4,10 +4,10 @@ import codecs
 import struct
 
 
-def qf(x):
-    b = binascii.a2b_uu(x)
-    b = binascii.hexlify(b)
-    y = str(b, 'ascii')
+# def qf(x):
+#     b = binascii.a2b_uu(x)
+#     b = binascii.hexlify(b)
+#     y = str(b, 'ascii')
     #codecs.encode(x, "hex")
     #print(b, y)
 
@@ -31,11 +31,11 @@ def checLine(dataLine):
     LenOk = (9 + (2 * BCHexToDec) + 2)                                  # Check if some bytes are missing
     checksumDec = "NULL"                                                # if no checksum in data provided, without if condition
     if dataLen ==  LenOk:                                               # checksumDec get some data out of the line which throw exception
-        print("----------------dataLine OK-------------------")
+        # print("----------------dataLine OK-------------------")
         checksumDec = int(checksum, 16)                                 # get the Dec checksum from Hex Value
     else:
         err += "Hex line too short! some bytes are missing! \n"
-        print(dataLen, LenOk)
+        # print(dataLen, LenOk)
 
 
 
@@ -60,20 +60,23 @@ def checLine(dataLine):
 
     checksumVerifyResult = (hex(checksumVerify).split('x')[-1]).upper() # convert checksum to Hex uppercase
 
-    print("Address: ", addressCode)
-    print("Byte count: ", byteCount)
-    print("Record type: ", recordType, typeString)
-    print("Checksum: ", checksum, "\n")
+    # print("Address: ", addressCode)
+    # print("Byte count: ", byteCount)
+    # print("Record type: ", recordType, typeString)
+    # print("Checksum: ", checksum, "\n")
 
     if len(checksumVerifyResult) == 1:                                  # add a ignored leading 0 to checksum, example: 0E gives E with a missing 0 after convertion Dec->Hex
-        print("----------------",len(checksumVerifyResult), "----------------")
-        print("Calculated Checksum: ", checksumVerifyResult.zfill(2))
-    else:
-        print("Calculated Checksum: ", checksumVerifyResult)
+        # print("----------------",len(checksumVerifyResult), "----------------")
+        # print("Calculated Checksum: ", checksumVerifyResult.zfill(2))
+        checksumVerifyResult = checksumVerifyResult.zfill(2)
+    # else:
+    #     print("Calculated Checksum: ", checksumVerifyResult)
 
 
-    print(err)
-    print("**************************************************")
+    # print(err)
+    # print("**************************************************")
+    LAR = (err ,addressCode, byteCount, recordType, typeString, checksum, checksumVerifyResult)
+    return LAR              # Line Analysed Result
 
 
 def typeStringfunc(argument):                                       # data type function
@@ -88,4 +91,4 @@ def typeStringfunc(argument):                                       # data type 
     return switcher.get(argument, "Unknown ")
 
 
-# checLine(':106B5000762E332E322E300043453133303037001D')
+# checLine(':106B5000762E332E322E30004345313330303700')

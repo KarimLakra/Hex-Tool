@@ -11,7 +11,8 @@ import tkinter.font as tkFont
 import tkinter.ttk as ttk
 import tkinter.messagebox
 import os
-import hexAnalyzer
+import hexLineAnalyzer
+import random
 
 class McListBox(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
@@ -72,8 +73,8 @@ root.Flines = ""    # Loads Source file
 #-------------------- Functions --------------------#
 def quitfunc():
     quit()
-def popAbout():
-    tkinter.messagebox.showinfo("About Hex-Manipulator", "Hex-Manipulator v1.0\n contact: karimlakra@hotmail.com")
+def MsgBox(a,b):
+    tkinter.messagebox.showinfo(a,b)
 def dirDialog():
     currdir = os.getcwd()
     tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title= 'Please select a directory where the new files will be saved')
@@ -87,54 +88,114 @@ def fileDialog():
         pathSource.delete(0,END)
         pathSource.insert(0,filename)
 
-def loadLines():
-    x = serialSource.get()
-    a = "".join([hex(ord(c))[2:].zfill(2) for c in x])
-    label_var_HOS.set(a)
+def loadLines(s,l,fo,lb, rw):
+                                                # s=serial, l=label,fo=file path,lb=listbox,
+    HFS = "".join([hex(ord(c))[2:].zfill(2) for c in s])  # hex from serial string
+    l.set(HFS)
 
-    fp=open(pathSource.get())
-    root.Flines=fp.readlines()
+    if rw == "R":                               # read hex source
+        fp=open(fo.get())
+        root.Flines=fp.readlines()
+        fp.close()
 
-    a = root.Flines[14009].strip()    #get lines to modify and remove whitespaces
+    a = root.Flines[14009].strip()              #get lines to modify and remove whitespaces
     b = root.Flines[28907].strip()
 
-    def prepareLine(va):
-        L1L = len(va)
-        dt = (va[:9], va[9:(L1L-11)+9],va[-2:])
+    def prepareLine(va, ln, rw):
+        # va = line number, ln = line 1 or 2, rw= operation read or write(read to generate hex, write to create the hex file)
+        L1L = len(va)                           # prepare the lines to insert to table
+        if rw == "R":
+            dt = (va[:9], va[9:(L1L-11)+9],va[-2:])     # prepare line from source hex file
+        elif rw == "W":
+            if ln == 1:
+                SHx = "".join([hex(ord(c))[2:].zfill(2) for c in serialSource.get()])               # convert string to hex
+                DHx = "".join([hex(ord(c))[2:].zfill(2) for c in serialDestination.get()])
+                cksum = hexLineAnalyzer.checLine(va[:9]+va[9:(L1L-11)+9].replace(SHx,DHx))        # Generate checksum for line1
+                dt = (va[:9], va[9:(L1L-11)+9].replace(SHx,DHx),cksum[6])
+            elif ln == 2:
+                SouRc = MACSource.get() + "".join([hex(ord(c))[2:].zfill(2) for c in serialSource.get()])
+                DesT = MACDestination.get() + "".join([hex(ord(c))[2:].zfill(2) for c in serialDestination.get()])
+                cksum = hexLineAnalyzer.checLine(va[:9]+va[9:(L1L-11)+9].replace(SouRc,DesT))        # Generate checksum for line2
+                dt = (va[:9], va[9:(L1L-11)+9].replace(SouRc,DesT),cksum[6])
+
         return dt
 
-    L1 = prepareLine(a)
-    L2 = prepareLine(b)
-    modiflines = (L1, L2)
+    L1 = prepareLine(a, 1, rw)
+    L2 = prepareLine(b, 2, rw)
 
-    rwsList1 = SH_listbox.tree.get_children()
+    modiflines = (L1, L2)                      # tuple from data
+
+    rwsList1 = lb.tree.get_children()          # get treeView children to empty
     for i in rwsList1:
-        SH_listbox.tree.delete(i)
-    for x in range(3):
-        SH_listbox.tree.column(x,width=99)
+        lb.tree.delete(i)
+    for x in range(3):                         # shrink columns width
+        lb.tree.column(x,width=99)
 
-    count = 1
+    count = 1                                  # counter to decrement to insert rows in treeView
     for item in modiflines:
-        SH_listbox.tree.insert('', '0', values=(modiflines[count][0],modiflines[count][1],modiflines[count][2]))
+        lb.tree.insert('', '0', values=(modiflines[count][0],modiflines[count][1],modiflines[count][2]))
 
-        for ix, val in enumerate(item):
+        for ix, val in enumerate(item):        # adjust columns width to fit new data
             col_w = tkFont.Font().measure(val)
-            if SH_listbox.tree.column(tbl_header1[ix],width=None)<col_w:
-                SH_listbox.tree.column(tbl_header1[ix], width=col_w)
+            if lb.tree.column(tbl_header1[ix],width=None)<col_w:
+                lb.tree.column(tbl_header1[ix], width=col_w)
         count -= 1
+    rslt = (L1,L2)
+    return  rslt                               # return Lines to modify
+
+
 def generatHex():
-    print('generated!')
+    if serialSource.get() == "":
+        missingEntry("The Source Serial")
+        serialSource.focus_set()
+    elif serialDestination.get() == "":
+        missingEntry("The Destination Serial")
+        serialDestination.focus_set()
+    elif MACSource.get() == "":
+        missingEntry("The MAC Source")
+        MACSource.focus_set()
+    elif MACDestination.get() == "":
+        missingEntry("The MAC Destination")
+        MACDestination.focus_set()
+    else:
+        if len(root.Flines)<14009:              # if lines are not loaded by Load Source Button
+                                                # TODO: reset .root.Flines if some entry changed
+                                                # this execute only once for the moment
+            root.line1 = loadLines(serialSource.get(),label_var_HOS, pathSource, SH_listbox, "R")
+            root.line2 = loadLines(serialDestination.get(),label_var_HOD, pathNewHx, DH_listbox, "W")
+
+        # root.Flines[14009]
+        status.config(bg=randomizCor())
+        label_status.set("Hex File generated successfully")
+    # print(root.line1,"\n",root.line2)
+
+
+
+def missingEntry(m):
+    status.config(bg=randomizCor())             # Generat random background for the status bar
+    label_status.set(m+" is needed.\n No file generated")
+def randomizCor():                              # random hex color generator
+    r = lambda:random.randint(0,255)
+    co = '#%02X%02X%02X' % (r(),r(),r())
+    co = co.replace('-','')
+    return co
+
 def SaveToHex():
+    # print(root.line1,"\n",root.line2)
+    # print(root.line2)
     if root.Flines != "":
         SaveToHex = os.path.join(pathNewHx.get(), serialDestination.get()+".hex")
+        # LAR = (err ,addressCode, byteCount, recordType, typeString, checksum, checksumVerifyResult)
+        # Generate checksum for lines
+        cs1 = hexLineAnalyzer.checLine(root.line2[0][0]+root.line2[0][1]+root.line2[0][2])
+        cs2 = hexLineAnalyzer.checLine(root.line2[1][0]+root.line2[1][1]+root.line2[1][2])
+        
         fo = open(SaveToHex, "w+")
         for i in range(len(root.Flines)):
             if i == 14009 :
-                print(root.Flines[i])
-                fo.write(root.Flines[i])
+                fo.write(root.line2[0][0]+root.line2[0][1]+cs1[6]+"\n")
             elif i == 28907:
-                print(root.Flines[i])
-                fo.write(root.Flines[i])
+                fo.write(root.line2[1][0]+root.line2[1][1]+cs2[6]+"\n")
             else:
                 fo.write(root.Flines[i])
         fo.close()
@@ -157,11 +218,10 @@ subMenu.add_command(label="Exit",command = quitfunc)
 
 helpMenu = Menu(menu, tearoff=False)
 menu.add_cascade(label="Help", menu = helpMenu)
-helpMenu.add_command(label="About", command = popAbout)
+helpMenu.add_command(label="About", command = lambda: MsgBox("About Hex-Manipulator", "Hex-Manipulator v1.0\n contact: karimlakra@hotmail.com"))
 #-------------------- Toolbar --------------------#
 #-------------------- Page Header --------------------#
 label_var = tk.StringVar() #update label text holder
-label_var.set("Enter some characters and press convert..")
 lbl1 = tk.Label(root, textvariable = label_var)
 lbl1.pack()
 
@@ -211,8 +271,9 @@ MACSource.insert(0, '1E306CA24747')
 
 f1.grid_rowconfigure(6, minsize=15)
 
-ButtonLS = Button(f1, text="Load Source HEX", width=15, height=2, command=lambda:loadLines())
-ButtonLS.grid(row=7, column=0, sticky=W)
+# ButtonLS = Button(f1, text="Load Source HEX", width=15, height=2,
+#     command=lambda:loadLines(serialSource.get(),label_var_HOS, pathSource, SH_listbox, "R"))
+# ButtonLS.grid(row=7, column=0, sticky=W)
 
 f1.grid_rowconfigure(8, minsize=15)
 #----------- Labels/Buttons Destination -----------#
@@ -235,8 +296,10 @@ SoS.grid(row=2, column=9, sticky=W)
 serialDestination = Entry(f1)
 serialDestination.grid(row=3, column=7, sticky=W)
 serialDestination.insert(0, 'CE16937')
-HOS = Label(f1, text='HexDestinationHolder', relief=SUNKEN, width=30)
-HOS.grid(row=3, column=9, sticky=W)
+label_var_HOD = tk.StringVar() # var to update label text holder
+label_var_HOD.set("")
+HOD = Label(f1, text='HexDestinationHolder', relief=SUNKEN, width=30, textvariable = label_var_HOD)
+HOD.grid(row=3, column=9, sticky=W)
 
 DMA = Label(f1, text='Destination MAC address')
 DMA.grid(row=4, column=7, sticky=W)
@@ -279,7 +342,9 @@ n.bind("<<NotebookTabChanged>>", handle_tab_changed)    # detects the active tab
 #-------------------- Status bar --------------------#
 statusFrame = Frame(root)
 statusFrame.pack(side=BOTTOM, fill=X)
-status = Label(statusFrame, text="status bar", relief=SUNKEN, anchor=W)
+label_status = tk.StringVar() # Variable for a dynamic status label
+label_status.set("status bar")
+status = Label(statusFrame, relief=SUNKEN, anchor=W, textvariable = label_status)
 status.pack(fill=X)
 
 root.mainloop()
