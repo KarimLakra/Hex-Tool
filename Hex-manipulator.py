@@ -158,16 +158,16 @@ def generatHex():
         missingEntry("The MAC Destination")
         MACDestination.focus_set()
     else:
-        if len(root.Flines)<14009:              # if lines are not loaded by Load Source Button
+        #if len(root.Flines)<14009:              # if lines are not loaded by Load Source Button
                                                 # TODO: reset .root.Flines if some entry changed
                                                 # this execute only once for the moment
-            root.line1 = loadLines(serialSource.get(),label_var_HOS, pathSource, SH_listbox, "R")
-            root.line2 = loadLines(serialDestination.get(),label_var_HOD, pathNewHx, DH_listbox, "W")
+        root.Sourc = loadLines(serialSource.get(),label_var_HOS, pathSource, SH_listbox, "R")
+        root.Destin = loadLines(serialDestination.get(),label_var_HOD, pathNewHx, DH_listbox, "W")
 
         # root.Flines[14009]
         status.config(bg=randomizCor())
         label_status.set("Hex File generated successfully")
-    # print(root.line1,"\n",root.line2)
+    # print(root.Sourc,"\n",root.Destin)
 
 
 
@@ -181,21 +181,19 @@ def randomizCor():                              # random hex color generator
     return co
 
 def SaveToHex():
-    # print(root.line1,"\n",root.line2)
-    # print(root.line2)
     if root.Flines != "":
         SaveToHex = os.path.join(pathNewHx.get(), serialDestination.get()+".hex")
         # LAR = (err ,addressCode, byteCount, recordType, typeString, checksum, checksumVerifyResult)
         # Generate checksum for lines
-        cs1 = hexLineAnalyzer.checLine(root.line2[0][0]+root.line2[0][1]+root.line2[0][2])
-        cs2 = hexLineAnalyzer.checLine(root.line2[1][0]+root.line2[1][1]+root.line2[1][2])
-        
+        cs1 = hexLineAnalyzer.checLine(root.Destin[0][0]+root.Destin[0][1]+root.Destin[0][2])
+        cs2 = hexLineAnalyzer.checLine(root.Destin[1][0]+root.Destin[1][1]+root.Destin[1][2])
+
         fo = open(SaveToHex, "w+")
         for i in range(len(root.Flines)):
             if i == 14009 :
-                fo.write(root.line2[0][0]+root.line2[0][1]+cs1[6]+"\n")
+                fo.write(root.Destin[0][0]+root.Destin[0][1]+cs1[6]+"\n")
             elif i == 28907:
-                fo.write(root.line2[1][0]+root.line2[1][1]+cs2[6]+"\n")
+                fo.write(root.Destin[1][0]+root.Destin[1][1]+cs2[6]+"\n")
             else:
                 fo.write(root.Flines[i])
         fo.close()
