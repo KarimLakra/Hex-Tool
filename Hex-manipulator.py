@@ -89,7 +89,7 @@ class McListBox(object):
 #-------------------- the test data --------------------#
 tbl_header1 = ['First part', 'Data', 'Checksum']
 tbl_list1 = [
-('','', '-'),
+('','', ''),
 ('','', '')
 ]
 
@@ -201,11 +201,13 @@ def loadLines(s,l,fo,lb, rw):
     a = root.Flines[14009].strip()              #get lines to modify and remove whitespaces
     b = root.Flines[28907].strip()
 
+
     def prepareLine(va, ln, rw):
         # va = line number, ln = line 1 or 2, rw= operation read or write(read to generate hex, write to create the hex file)
         L1L = len(va)                           # prepare the lines to insert to table
         if rw == "R":
             dt = (va[:9], va[9:(L1L-11)+9],va[-2:])     # prepare line from source hex file
+            # print(dt)
         elif rw == "W":
             if ln == 1:
                 SHx = "".join([hex(ord(c))[2:].zfill(2) for c in serialSource.get()])               # convert string to hex
@@ -242,19 +244,23 @@ def loadLines(s,l,fo,lb, rw):
 
     rslt = (L1,L2)
     return  rslt                               # return Lines to modify
-def NextSerial():
+def NextPrevSerial(op):
+    if op == "N":
+        op = 1
+    elif op == "P":
+        op = -1
     a = serialDestination.get()
-    b = str(int(a[2:])+1)
+    b = str(int(a[2:])+op)
     c = a[:-5]+b
     serialDestination.delete(0,END)
     serialDestination.insert(0,c)
 
     a = MACDestination.get()
-    b = str(int(a[7:])+1)
+    b = str(int(a[7:])+op)
     c = a[:-5]+b
     MACDestination.delete(0,END)
     MACDestination.insert(0,c)
-
+    generatHex()
 
 def generatHex():
     if serialSource.get() == "":
@@ -449,8 +455,8 @@ MACDestination.grid(row=5, column=7, sticky=W)
 MACDestination.insert(0, ConfigData[5])                 # Mac addr destination
 
 ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2, command=generatHex)   # Genarate new button
-ButtonPRV = Button(f1, text="<", fg='red', width=3, height=2, command=Nothingfunc)   # Previous serial
-ButtonNXT = Button(f1, text=">", fg='red', width=3, height=2, command=NextSerial)   # Next serial
+ButtonPRV = Button(f1, text="<", fg='red', width=3, height=2, command=lambda:NextPrevSerial("P"))   # Previous serial
+ButtonNXT = Button(f1, text=">", fg='red', width=3, height=2, command=lambda:NextPrevSerial("N"))   # Next serial
 ButtonSV = Button(f1, text="Save", fg='#62674b', command=SaveToHex, width=15, height=2)   # Save genarated file
 
 ButtonST.grid(row=1, column=12, sticky=E)
