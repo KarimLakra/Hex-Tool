@@ -18,7 +18,7 @@ import tooltip
 #-------------------- Main window --------------------#
 root = tk.Tk()
 root.wm_title("Hex files tool")
-root.geometry("1450x600")
+root.geometry("1450x700")
 
 label_tool_var = tk.StringVar() #update label tool bar
 
@@ -44,7 +44,7 @@ class McListBox(object):
     def _setup_widgets(self):
         container = ttk.Frame(f1)
         #container.pack()#fill='both', expand=True)
-        container.grid(row=10, column=root.a, columnspan=6, sticky='wens', padx=0, pady=0)
+        container.grid(row=11, column=root.a, columnspan=6, sticky='wens', padx=0, pady=0)
         # create a treeview with dual scrollbars
         self.tree = ttk.Treeview(columns=tbl_header, show="headings")
         vsb = ttk.Scrollbar(orient="vertical",
@@ -89,7 +89,7 @@ class McListBox(object):
 #-------------------- the test data --------------------#
 tbl_header1 = ['First part', 'Data', 'Checksum']
 tbl_list1 = [
-('','', ''),
+('','', '-'),
 ('','', '')
 ]
 
@@ -134,7 +134,8 @@ def saveSetting():
 
 loadSetting()     # Load the setting from setting file
 
-def loadSetting():
+def reloadSetting():
+    ClearAllFields()
     pathSource.insert(0,ConfigData[0])                        # Source file path
     serialSource.insert(0, ConfigData[2])                     # serial source
     MACSource.insert(0, ConfigData[4])                        # Mac addr source
@@ -142,6 +143,10 @@ def loadSetting():
     pathNewHx.insert(0,ConfigData[1])                         # path where the generated hex file will be saved
     serialDestination.insert(0, ConfigData[3])                # Serial destination
     MACDestination.insert(0, ConfigData[5])                 # Mac addr destination
+
+    label_toolBar.config(bg=randomizCor())
+    label_tool_var.set('Setting reloaded')
+
 def ClearAllFields():
     pathSource.delete(0,END)                        # Source file path
     serialSource.delete(0,END)                     # serial source
@@ -151,6 +156,8 @@ def ClearAllFields():
     serialDestination.delete(0,END)                # Serial destination
     MACDestination.delete(0,END)                 # Mac addr destination
 
+    label_toolBar.config(bg=randomizCor())
+    label_tool_var.set('Fields cleared')
 
 def deleteSetting():
     PathConfiguration = os.path.join(os.getcwd()+Separator+"setting")
@@ -235,6 +242,18 @@ def loadLines(s,l,fo,lb, rw):
 
     rslt = (L1,L2)
     return  rslt                               # return Lines to modify
+def NextSerial():
+    a = serialDestination.get()
+    b = str(int(a[2:])+1)
+    c = a[:-5]+b
+    serialDestination.delete(0,END)
+    serialDestination.insert(0,c)
+
+    a = MACDestination.get()
+    b = str(int(a[7:])+1)
+    c = a[:-5]+b
+    MACDestination.delete(0,END)
+    MACDestination.insert(0,c)
 
 
 def generatHex():
@@ -320,7 +339,7 @@ saveSett = Button(toolbar, image=Ssett, command=saveSetting)
 saveSett.grid(row=0, padx=5)
 SaveConfigTooltip = tooltip.CreateToolTip(saveSett, "Save current settings")
 
-reloadSett = Button(toolbar, image=Loadsett, command=loadSetting)
+reloadSett = Button(toolbar, image=Loadsett, command=reloadSetting)
 reloadSett.grid(row=0, column=1, padx=5)
 reloadConfigTooltip = tooltip.CreateToolTip(reloadSett, "Load/reload settings")
 
@@ -328,14 +347,17 @@ delSett = Button(toolbar, image=Dsett, command=deleteSetting)
 delSett.grid(row=0, column=2, padx=5)
 DeleteConfigTooltip = tooltip.CreateToolTip(delSett, "Delete current settings")
 
+SeparatorSettField = ttk.Separator(toolbar, orient=VERTICAL)
+SeparatorSettField.grid(row=0, column=3, padx=5, sticky=N+S)
+
 ClearFields = Button(toolbar, image=CFields, command=ClearAllFields)
-ClearFields.grid(row=0, column=3, padx=5)
+ClearFields.grid(row=0, column=4, padx=5)
 ClearFieldsTooltip = tooltip.CreateToolTip(ClearFields, "Clear Fields")
 
 # toolbar.grid_columnconfigure(, minsize=3)
 
 label_toolBar = tk.Label(toolbar, textvariable = label_tool_var, bg="#6bb2c6", width=25, padx=3)
-label_toolBar.grid(row=0, column=4)
+label_toolBar.grid(row=0, column=5)
 
 toolbar.pack(side=TOP, fill=X)
 #-------------------- Page Header --------------------#
@@ -394,6 +416,7 @@ f1.grid_rowconfigure(6, minsize=15)
 # ButtonLS.grid(row=7, column=0, sticky=W)
 
 f1.grid_rowconfigure(8, minsize=15)
+f1.grid_rowconfigure(10, minsize=15)
 #----------- Labels/Buttons Destination -----------#
 f1.grid_columnconfigure(6, minsize=60)
 FNH = Label(f1, text='Destination Hex file', bg='#5e5', fg='#000')
@@ -425,12 +448,16 @@ MACDestination = Entry(f1)#, width=55)
 MACDestination.grid(row=5, column=7, sticky=W)
 MACDestination.insert(0, ConfigData[5])                 # Mac addr destination
 
-ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2, command=generatHex)   #Genarate new button
-ButtonSV = Button(f1, text="Save", fg='#62674b', command=SaveToHex, width=15, height=2)   #Save genarated file
+ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2, command=generatHex)   # Genarate new button
+ButtonPRV = Button(f1, text="<", fg='red', width=3, height=2, command=Nothingfunc)   # Previous serial
+ButtonNXT = Button(f1, text=">", fg='red', width=3, height=2, command=NextSerial)   # Next serial
+ButtonSV = Button(f1, text="Save", fg='#62674b', command=SaveToHex, width=15, height=2)   # Save genarated file
 
 ButtonST.grid(row=1, column=12, sticky=E)
-ButtonGN.grid(row=7, column=7, sticky=W)
-ButtonSV.grid(row=7, column=9)
+ButtonGN.grid(row=9, column=7, sticky=W)
+ButtonPRV.grid(row=7, column=7, sticky=W)
+ButtonNXT.grid(row=7, column=9, sticky=W)
+ButtonSV.grid(row=9, column=9)
 
 #----------- Table data -----------#
 root.a = 0                             # variable to pass to the class for positioning the table
@@ -459,7 +486,7 @@ n.bind("<<NotebookTabChanged>>", handle_tab_changed)    # detects the active tab
 #-------------------- Info right bar --------------------#
 
 InfoLines = Label(f1, relief=SUNKEN, width=30, textvariable = label_var_InfoLines, anchor=W, justify=LEFT)
-InfoLines.grid(row=10, column=13, sticky=W+N+E)
+InfoLines.grid(row=11, column=13, sticky=W+N+E)
 
 #-------------------- Status bar --------------------#
 statusFrame = Frame(root)
