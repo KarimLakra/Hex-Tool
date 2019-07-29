@@ -30,6 +30,7 @@ label_status.set("status bar")
 
 ConfigData = ['','','','','','']                # global variable to hold the config data
 
+Separator = os.sep                              # Check operating system windows uses \ separator linux uses /
 #----------------------------------------------------------#
 
 label_var_InfoLines.set("Double Click a line from destination \nHex to analyze")
@@ -104,7 +105,7 @@ def loadSetting():
     global ConfigData
 
     currdir = os.getcwd()
-    LoadConfiguration = os.path.join(currdir+"\setting")
+    LoadConfiguration = os.path.join(currdir+Separator+"setting")
 
 
     checkConfig = 0
@@ -123,7 +124,7 @@ def saveSetting():
     ConfigData = [pathSource.get(), pathNewHx.get(), serialSource.get(), \
         serialDestination.get(), MACSource.get(), MACDestination.get()]
     currdir = os.getcwd()
-    SaveConfiguration = os.path.join(currdir+"\setting")
+    SaveConfiguration = os.path.join(currdir+Separator+"setting")
     fo = open(SaveConfiguration, "w")
     for i in range(6):
         fo.write(ConfigData[i]+"\n")
@@ -132,6 +133,31 @@ def saveSetting():
     label_tool_var.set('Setting saved')
 
 loadSetting()     # Load the setting from setting file
+
+def loadSetting():
+    pathSource.insert(0,ConfigData[0])                        # Source file path
+    serialSource.insert(0, ConfigData[2])                     # serial source
+    MACSource.insert(0, ConfigData[4])                        # Mac addr source
+
+    pathNewHx.insert(0,ConfigData[1])                         # path where the generated hex file will be saved
+    serialDestination.insert(0, ConfigData[3])                # Serial destination
+    MACDestination.insert(0, ConfigData[5])                 # Mac addr destination
+def ClearAllFields():
+    pathSource.delete(0,END)                        # Source file path
+    serialSource.delete(0,END)                     # serial source
+    MACSource.delete(0,END)                        # Mac addr source
+
+    pathNewHx.delete(0,END)                         # path where the generated hex file will be saved
+    serialDestination.delete(0,END)                # Serial destination
+    MACDestination.delete(0,END)                 # Mac addr destination
+
+
+def deleteSetting():
+    PathConfiguration = os.path.join(os.getcwd()+Separator+"setting")
+    open(PathConfiguration, 'w').close()
+
+    label_toolBar.config(bg=randomizCor())
+    label_tool_var.set('Setting deleted')
 
 def quitfunc():
     quit()
@@ -240,7 +266,7 @@ def generatHex():
 
 def missingEntry(m):
     status.config(bg=randomizCor())             # Generat random background for the status bar
-    label_status.set(m+" is needed.\n No file generated")
+    label_status.set(m+" is needed. No file generated")
 def randomizCor():                              # random hex color generator
     r = lambda:random.randint(0,255)
     co = '#%02X%02X%02X' % (r(),r(),r())
@@ -285,21 +311,31 @@ helpMenu.add_command(label="About", command = lambda: MsgBox("About Hex-Manipula
 #-------------------- Toolbar --------------------#
 Ssett = PhotoImage(file="saveSett.png")
 Dsett = PhotoImage(file="delSett.png")
+CFields = PhotoImage(file="clear.png")
+Loadsett = PhotoImage(file="load.png")
 
 toolbar = Frame(root, width="500", pady=4, bg="#6bb2c6")
 # toolbar.configure(pady=(0,10))
-saveSett = Button(toolbar, text="Config", image=Ssett, command=saveSetting)
-saveSett.grid(row=0, padx=10)
+saveSett = Button(toolbar, image=Ssett, command=saveSetting)
+saveSett.grid(row=0, padx=5)
 SaveConfigTooltip = tooltip.CreateToolTip(saveSett, "Save current settings")
 
-delSett = Button(toolbar, text="Print", image=Dsett, command=Nothingfunc)
-delSett.grid(row=0, column=1, padx=10)
+reloadSett = Button(toolbar, image=Loadsett, command=loadSetting)
+reloadSett.grid(row=0, column=1, padx=5)
+reloadConfigTooltip = tooltip.CreateToolTip(reloadSett, "Load/reload settings")
+
+delSett = Button(toolbar, image=Dsett, command=deleteSetting)
+delSett.grid(row=0, column=2, padx=5)
 DeleteConfigTooltip = tooltip.CreateToolTip(delSett, "Delete current settings")
+
+ClearFields = Button(toolbar, image=CFields, command=ClearAllFields)
+ClearFields.grid(row=0, column=3, padx=5)
+ClearFieldsTooltip = tooltip.CreateToolTip(ClearFields, "Clear Fields")
 
 # toolbar.grid_columnconfigure(, minsize=3)
 
 label_toolBar = tk.Label(toolbar, textvariable = label_tool_var, bg="#6bb2c6", width=25, padx=3)
-label_toolBar.grid(row=0, column=2)
+label_toolBar.grid(row=0, column=4)
 
 toolbar.pack(side=TOP, fill=X)
 #-------------------- Page Header --------------------#
