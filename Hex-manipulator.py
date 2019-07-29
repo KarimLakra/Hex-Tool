@@ -13,16 +13,24 @@ import tkinter.messagebox
 import os
 import hexLineAnalyzer
 import random
-
+import tooltip
 
 #-------------------- Main window --------------------#
 root = tk.Tk()
 root.wm_title("Hex files tool")
 root.geometry("1450x600")
 
-root.Flines = ""    # Loads Source file
+label_tool_var = tk.StringVar() #update label tool bar
 
+root.Flines = ""    # Loads Source file
 label_var_InfoLines = tk.StringVar() #update label text holder
+
+label_status = tk.StringVar() # Variable for a dynamic status label
+label_status.set("status bar")
+
+ConfigData = ['','','','','','']                # global variable to hold the config data
+
+#----------------------------------------------------------#
 
 label_var_InfoLines.set("Double Click a line from destination \nHex to analyze")
 
@@ -92,13 +100,47 @@ tbl_list2 = [
 
 
 #-------------------- Functions --------------------#
+def loadSetting():
+    global ConfigData
+
+    currdir = os.getcwd()
+    LoadConfiguration = os.path.join(currdir+"\setting")
+
+
+    checkConfig = 0
+    fo = open(LoadConfiguration, "r")
+    conf = fo.readlines()
+    fo.close()
+    for i, val in enumerate(conf):
+        ConfigData[i] = conf[i].replace("\n", "")
+    for i in ConfigData:
+        if i == '':
+            checkConfig += 1
+    if checkConfig == 6:
+        label_tool_var.set('No Setting data found')
+
+def saveSetting():
+    ConfigData = [pathSource.get(), pathNewHx.get(), serialSource.get(), \
+        serialDestination.get(), MACSource.get(), MACDestination.get()]
+    currdir = os.getcwd()
+    SaveConfiguration = os.path.join(currdir+"\setting")
+    fo = open(SaveConfiguration, "w")
+    for i in range(6):
+        fo.write(ConfigData[i]+"\n")
+    fo.close()
+    label_toolBar.config(bg=randomizCor())
+    label_tool_var.set('Setting saved')
+
+loadSetting()     # Load the setting from setting file
+
 def quitfunc():
     quit()
 def MsgBox(a,b):
     tkinter.messagebox.showinfo(a,b)
 def dirDialog():
     currdir = os.getcwd()
-    tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title= 'Please select a directory where the new files will be saved')
+    tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, \
+        title= 'Please select a directory where the new files will be saved')
     if len(tempdir) > 0:
         if tempdir != '':
             pathNewHx.delete(0,END)
@@ -115,12 +157,16 @@ def loadLines(s,l,fo,lb, rw):
     l.set(HFS)
 
     if rw == "R":                               # read hex source
+        # if fo.get() == '':
+            # status.config(bg=randomizCor())
+            # label_status.set("Select a Source path first")
+        # else:
         fp=open(fo.get())
         root.Flines=fp.readlines()
         fp.close()
 
-    a = root.Flines[14009].strip()              #get lines to modify and remove whitespaces
-    b = root.Flines[28907].strip()
+        a = root.Flines[14009].strip()              #get lines to modify and remove whitespaces
+        b = root.Flines[28907].strip()
 
     def prepareLine(va, ln, rw):
         # va = line number, ln = line 1 or 2, rw= operation read or write(read to generate hex, write to create the hex file)
@@ -221,8 +267,10 @@ def SaveToHex():
 
 
     else:
-        print("Please load the source Hex file first")
-
+        status.config(bg=randomizCor())
+        label_status.set("Please Generate New Hex file first")
+def Nothingfunc():
+    print('Nothing')
 #-------------------- Menu --------------------#
 menu = Menu(root)
 root.config(menu=menu)
@@ -235,6 +283,25 @@ helpMenu = Menu(menu, tearoff=False)
 menu.add_cascade(label="Help", menu = helpMenu)
 helpMenu.add_command(label="About", command = lambda: MsgBox("About Hex-Manipulator", "Hex-Manipulator v1.0\n contact: karimlakra@hotmail.com"))
 #-------------------- Toolbar --------------------#
+Ssett = PhotoImage(file="saveSett.png")
+Dsett = PhotoImage(file="delSett.png")
+
+toolbar = Frame(root, width="500", pady=4, bg="#6bb2c6")
+# toolbar.configure(pady=(0,10))
+saveSett = Button(toolbar, text="Config", image=Ssett, command=saveSetting)
+saveSett.grid(row=0, padx=10)
+SaveConfigTooltip = tooltip.CreateToolTip(saveSett, "Save current settings")
+
+delSett = Button(toolbar, text="Print", image=Dsett, command=Nothingfunc)
+delSett.grid(row=0, column=1, padx=10)
+DeleteConfigTooltip = tooltip.CreateToolTip(delSett, "Delete current settings")
+
+# toolbar.grid_columnconfigure(, minsize=3)
+
+label_toolBar = tk.Label(toolbar, textvariable = label_tool_var, bg="#6bb2c6", width=25, padx=3)
+label_toolBar.grid(row=0, column=2)
+
+toolbar.pack(side=TOP, fill=X)
 #-------------------- Page Header --------------------#
 label_var = tk.StringVar() #update label text holder
 lbl1 = tk.Label(root, textvariable = label_var)
@@ -257,7 +324,7 @@ mhfp.grid(row=0, sticky=W)
 pathSource = Entry(f1, width=55)
 pathSource.grid(row=1, columnspan=5, sticky=W)
 # pathSource.delete(0,END)
-pathSource.insert(0,'/home/kardes/Tests/Python/hex/CE13007 MAC 1e306ca24747 MASTER.hex')
+pathSource.insert(0,ConfigData[0])                        # Source file path
 ButtonLMF = Button(f1, compound=TOP, width=30, height=20, image=folderpic, command=fileDialog)   #Load master file button
 ButtonLMF.grid(row=1, column=5, sticky=E)
 
@@ -272,7 +339,7 @@ SoS.grid(row=2, column=2, sticky=W)
 #f1.grid_columnconfigure(3, minsize=3)
 serialSource = Entry(f1)#, width=55)
 serialSource.grid(row=3, sticky=W)
-serialSource.insert(0, 'CE13007')
+serialSource.insert(0, ConfigData[2])                     # serial source
 label_var_HOS = tk.StringVar() #update label text holder
 label_var_HOS.set("")
 HOS = Label(f1, text='HexSourceHolder', relief=SUNKEN, width=30, textvariable = label_var_HOS)
@@ -282,7 +349,7 @@ SMA = Label(f1, text='Source MAC address')
 SMA.grid(row=4, column=0, sticky=W)
 MACSource = Entry(f1)#, width=55)
 MACSource.grid(row=5, sticky=W)
-MACSource.insert(0, '1E306CA24747')
+MACSource.insert(0, ConfigData[4])                        # Mac addr source
 
 f1.grid_rowconfigure(6, minsize=15)
 
@@ -297,7 +364,7 @@ FNH = Label(f1, text='Destination Hex file', bg='#5e5', fg='#000')
 FNH.grid(row=0, column=7, sticky=W)
 pathNewHx = Entry(f1, width=55)
 pathNewHx.grid(row=1, column=7, columnspan=5, sticky=W)
-pathNewHx.insert(0,'/home/kardes/Tests/Python/hex/HexFilesTest')
+pathNewHx.insert(0,ConfigData[1])                         # path where the generated hex file will be saved
 ButtonST = Button(f1, text="Save to Folder", fg='red', width=30, height=20, image=folderpic, command=dirDialog)   #Genarate new button
 
 DS = Label(f1, text='Destination serial')
@@ -310,7 +377,7 @@ SoS.grid(row=2, column=9, sticky=W)
 
 serialDestination = Entry(f1)
 serialDestination.grid(row=3, column=7, sticky=W)
-serialDestination.insert(0, 'CE16937')
+serialDestination.insert(0, ConfigData[3])                # Serial destination
 label_var_HOD = tk.StringVar() # var to update label text holder
 label_var_HOD.set("")
 HOD = Label(f1, text='HexDestinationHolder', relief=SUNKEN, width=30, textvariable = label_var_HOD)
@@ -320,7 +387,7 @@ DMA = Label(f1, text='Destination MAC address')
 DMA.grid(row=4, column=7, sticky=W)
 MACDestination = Entry(f1)#, width=55)
 MACDestination.grid(row=5, column=7, sticky=W)
-MACDestination.insert(0, '1E306CA26097')
+MACDestination.insert(0, ConfigData[5])                 # Mac addr destination
 
 ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2, command=generatHex)   #Genarate new button
 ButtonSV = Button(f1, text="Save", fg='#62674b', command=SaveToHex, width=15, height=2)   #Save genarated file
@@ -361,8 +428,6 @@ InfoLines.grid(row=10, column=13, sticky=W+N+E)
 #-------------------- Status bar --------------------#
 statusFrame = Frame(root)
 statusFrame.pack(side=BOTTOM, fill=X)
-label_status = tk.StringVar() # Variable for a dynamic status label
-label_status.set("status bar")
 status = Label(statusFrame, relief=SUNKEN, anchor=W, textvariable = label_status)
 status.pack(fill=X)
 
