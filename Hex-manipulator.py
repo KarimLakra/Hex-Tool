@@ -165,8 +165,8 @@ def loadLines(s,l,fo,lb, rw):
         root.Flines=fp.readlines()
         fp.close()
 
-        a = root.Flines[14009].strip()              #get lines to modify and remove whitespaces
-        b = root.Flines[28907].strip()
+    a = root.Flines[14009].strip()              #get lines to modify and remove whitespaces
+    b = root.Flines[28907].strip()
 
     def prepareLine(va, ln, rw):
         # va = line number, ln = line 1 or 2, rw= operation read or write(read to generate hex, write to create the hex file)
