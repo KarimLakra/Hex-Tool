@@ -107,7 +107,6 @@ def loadSetting():
     currdir = os.getcwd()
     LoadConfiguration = os.path.join(currdir+Separator+"setting")
 
-
     checkConfig = 0
     fo = open(LoadConfiguration, "r")
     conf = fo.readlines()
@@ -136,6 +135,7 @@ loadSetting()     # Load the setting from setting file
 
 def reloadSetting():
     ClearAllFields()
+    loadSetting()
     pathSource.insert(0,ConfigData[0])                        # Source file path
     serialSource.insert(0, ConfigData[2])                     # serial source
     MACSource.insert(0, ConfigData[4])                        # Mac addr source
