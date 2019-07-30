@@ -33,7 +33,7 @@ ConfigData = ['','','','','','']                # global variable to hold the co
 Separator = os.sep                              # Check operating system windows uses \ separator linux uses /
 #----------------------------------------------------------#
 
-label_var_InfoLines.set("Double Click a line from destination \nHex to analyze")
+label_var_InfoLines.set("Double Click a line \n to analyze")
 
 class McListBox(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
@@ -44,7 +44,7 @@ class McListBox(object):
     def _setup_widgets(self):
         container = ttk.Frame(f1)
         #container.pack()#fill='both', expand=True)
-        container.grid(row=11, column=root.a, columnspan=6, sticky='wens', padx=0, pady=0)
+        container.grid(row=12, column=root.a, columnspan=6, sticky='wens', padx=0, pady=0)
         # create a treeview with dual scrollbars
         self.tree = ttk.Treeview(columns=tbl_header, show="headings")
         vsb = ttk.Scrollbar(orient="vertical",
@@ -190,10 +190,6 @@ def loadLines(s,l,fo,lb, rw):
     l.set(HFS)
 
     if rw == "R":                               # read hex source
-        # if fo.get() == '':
-            # status.config(bg=randomizCor())
-            # label_status.set("Select a Source path first")
-        # else:
         fp=open(fo.get())
         root.Flines=fp.readlines()
         fp.close()
@@ -263,17 +259,22 @@ def NextPrevSerial(op):
     generatHex()
 
 def generatHex():
-    if serialSource.get() == "":
-        missingEntry("The Source Serial")
+    fo = pathSource.get()
+    if not os.path.exists(fo):
+        missingEntry("The path to the Source file is wrong or the file does not exist!")
+        err = True
+        pathSource.focus_set()
+    elif serialSource.get() == "":
+        missingEntry("The Source Serial is needed. No file generated")
         serialSource.focus_set()
     elif serialDestination.get() == "":
-        missingEntry("The Destination Serial")
+        missingEntry("The Destination Serial is needed. No file generated")
         serialDestination.focus_set()
     elif MACSource.get() == "":
-        missingEntry("The MAC Source")
+        missingEntry("The MAC Source is needed. No file generated")
         MACSource.focus_set()
     elif MACDestination.get() == "":
-        missingEntry("The MAC Destination")
+        missingEntry("The MAC Destination is needed. No file generated")
         MACDestination.focus_set()
     else:
         #if len(root.Flines)<14009:              # if lines are not loaded by Load Source Button
@@ -291,7 +292,7 @@ def generatHex():
 
 def missingEntry(m):
     status.config(bg=randomizCor())             # Generat random background for the status bar
-    label_status.set(m+" is needed. No file generated")
+    label_status.set(m)
 def randomizCor():                              # random hex color generator
     r = lambda:random.randint(0,255)
     co = '#%02X%02X%02X' % (r(),r(),r())
@@ -300,21 +301,26 @@ def randomizCor():                              # random hex color generator
 
 def SaveToHex():
     if root.Flines != "":
-        SaveToHex = os.path.join(pathNewHx.get(), serialDestination.get()+".hex")
-        # LAR = (err ,addressCode, byteCount, recordType, typeString, checksum, checksumVerifyResult)
-        # Generate checksum for lines
-        cs1 = hexLineAnalyzer.checLine(root.Destin[0][0]+root.Destin[0][1]+root.Destin[0][2])
-        cs2 = hexLineAnalyzer.checLine(root.Destin[1][0]+root.Destin[1][1]+root.Destin[1][2])
+        fi = pathNewHx.get()
+        if not os.path.exists(fi):
+            missingEntry("The path to the Destination file seems not correct. Use the button to select a correct path.")
+            pathNewHx.focus_set()
+        else:
+            SaveToHex = os.path.join(pathNewHx.get(), serialDestination.get()+".hex")
+            # LAR = (err ,addressCode, byteCount, recordType, typeString, checksum, checksumVerifyResult)
+            # Generate checksum for lines
+            cs1 = hexLineAnalyzer.checLine(root.Destin[0][0]+root.Destin[0][1]+root.Destin[0][2])
+            cs2 = hexLineAnalyzer.checLine(root.Destin[1][0]+root.Destin[1][1]+root.Destin[1][2])
 
-        fo = open(SaveToHex, "w+")
-        for i in range(len(root.Flines)):
-            if i == 14009 :
-                fo.write(root.Destin[0][0]+root.Destin[0][1]+cs1[6]+"\n")
-            elif i == 28907:
-                fo.write(root.Destin[1][0]+root.Destin[1][1]+cs2[6]+"\n")
-            else:
-                fo.write(root.Flines[i])
-        fo.close()
+            fo = open(SaveToHex, "w+")
+            for i in range(len(root.Flines)):
+                if i == 14009 :
+                    fo.write(root.Destin[0][0]+root.Destin[0][1]+cs1[6]+"\n")
+                elif i == 28907:
+                    fo.write(root.Destin[1][0]+root.Destin[1][1]+cs2[6]+"\n")
+                else:
+                    fo.write(root.Flines[i])
+            fo.close()
 
 
     else:
@@ -385,73 +391,86 @@ folderpic = PhotoImage(file="folder.png")
 mhfp = Label(f1, text='Source hex file path', bg='#a89999', fg='white')
 mhfp.grid(row=0, sticky=W)
 
-pathSource = Entry(f1, width=55)
+SB_PS = Scrollbar(f1, orient=HORIZONTAL)            # Scroll bar for path source
+SB_PS.grid(row=2, columnspan=5, sticky=W+N+E)
+
+pathSource = Entry(f1, width=55, xscrollcommand=SB_PS.set)
 pathSource.grid(row=1, columnspan=5, sticky=W)
-# pathSource.delete(0,END)
 pathSource.insert(0,ConfigData[0])                        # Source file path
+
+SB_PS.config(command=pathSource.xview)
+
 ButtonLMF = Button(f1, compound=TOP, width=30, height=20, image=folderpic, command=fileDialog)   #Load master file button
 ButtonLMF.grid(row=1, column=5, sticky=E)
 
 HOS = Label(f1, text='Source serial')
-HOS.grid(row=2, column=0, sticky=W)
+HOS.grid(row=3, column=0, sticky=W)
 
 f1.grid_columnconfigure(1, minsize=3)
 
 SoS = Label(f1, text='Hex of serial Source')
-SoS.grid(row=2, column=2, sticky=W)
+SoS.grid(row=3, column=2, sticky=W)
 
 #f1.grid_columnconfigure(3, minsize=3)
 serialSource = Entry(f1)#, width=55)
-serialSource.grid(row=3, sticky=W)
+serialSource.grid(row=4, sticky=W)
 serialSource.insert(0, ConfigData[2])                     # serial source
 label_var_HOS = tk.StringVar() #update label text holder
 label_var_HOS.set("")
 HOS = Label(f1, text='HexSourceHolder', relief=SUNKEN, width=30, textvariable = label_var_HOS)
-HOS.grid(row=3, column=2, sticky=W)
+HOS.grid(row=4, column=2, sticky=W)
 
 SMA = Label(f1, text='Source MAC address')
-SMA.grid(row=4, column=0, sticky=W)
+SMA.grid(row=5, column=0, sticky=W)
 MACSource = Entry(f1)#, width=55)
-MACSource.grid(row=5, sticky=W)
+MACSource.grid(row=6, sticky=W)
 MACSource.insert(0, ConfigData[4])                        # Mac addr source
 
-f1.grid_rowconfigure(6, minsize=15)
+f1.grid_rowconfigure(7, minsize=15)
 
 # ButtonLS = Button(f1, text="Load Source HEX", width=15, height=2,
 #     command=lambda:loadLines(serialSource.get(),label_var_HOS, pathSource, SH_listbox, "R"))
 # ButtonLS.grid(row=7, column=0, sticky=W)
 
-f1.grid_rowconfigure(8, minsize=15)
-f1.grid_rowconfigure(10, minsize=15)
+f1.grid_rowconfigure(9, minsize=15)
+f1.grid_rowconfigure(11, minsize=15)
 #----------- Labels/Buttons Destination -----------#
 f1.grid_columnconfigure(6, minsize=60)
 FNH = Label(f1, text='Destination Hex file', bg='#5e5', fg='#000')
 FNH.grid(row=0, column=7, sticky=W)
-pathNewHx = Entry(f1, width=55)
+
+SB_PD = Scrollbar(f1, orient=HORIZONTAL)            # Scroll bar for path destination
+SB_PD.grid(row=2, column=7, columnspan=5, sticky=W+N+E)
+
+pathNewHx = Entry(f1, width=55, xscrollcommand=SB_PD.set)
 pathNewHx.grid(row=1, column=7, columnspan=5, sticky=W)
 pathNewHx.insert(0,ConfigData[1])                         # path where the generated hex file will be saved
-ButtonST = Button(f1, text="Save to Folder", fg='red', width=30, height=20, image=folderpic, command=dirDialog)   #Genarate new button
+
+SB_PD.config(command=pathNewHx.xview)
+
+ButtonST = Button(f1, width=30, height=20, image=folderpic, command=dirDialog)   #Genarate new button
+ButtonST.grid(row=1, column=12, sticky=E)
 
 DS = Label(f1, text='Destination serial')
-DS.grid(row=2, column=7, sticky=W)
+DS.grid(row=3, column=7, sticky=W)
 
 f1.grid_columnconfigure(8, minsize=3)
 
 SoS = Label(f1, text='Hex of serial Destination')
-SoS.grid(row=2, column=9, sticky=W)
+SoS.grid(row=3, column=9, sticky=W)
 
 serialDestination = Entry(f1)
-serialDestination.grid(row=3, column=7, sticky=W)
+serialDestination.grid(row=4, column=7, sticky=W)
 serialDestination.insert(0, ConfigData[3])                # Serial destination
 label_var_HOD = tk.StringVar() # var to update label text holder
 label_var_HOD.set("")
 HOD = Label(f1, text='HexDestinationHolder', relief=SUNKEN, width=30, textvariable = label_var_HOD)
-HOD.grid(row=3, column=9, sticky=W)
+HOD.grid(row=4, column=9, sticky=W)
 
 DMA = Label(f1, text='Destination MAC address')
-DMA.grid(row=4, column=7, sticky=W)
+DMA.grid(row=5, column=7, sticky=W)
 MACDestination = Entry(f1)#, width=55)
-MACDestination.grid(row=5, column=7, sticky=W)
+MACDestination.grid(row=6, column=7, sticky=W)
 MACDestination.insert(0, ConfigData[5])                 # Mac addr destination
 
 ButtonGN = Button(f1, text="Generate New", fg='red', width=15, height=2, command=generatHex)   # Genarate new button
@@ -459,11 +478,10 @@ ButtonPRV = Button(f1, text="<", fg='red', width=3, height=2, command=lambda:Nex
 ButtonNXT = Button(f1, text=">", fg='red', width=3, height=2, command=lambda:NextPrevSerial("N"))   # Next serial
 ButtonSV = Button(f1, text="Save", fg='#62674b', command=SaveToHex, width=15, height=2)   # Save genarated file
 
-ButtonST.grid(row=1, column=12, sticky=E)
-ButtonGN.grid(row=9, column=7, sticky=W)
-ButtonPRV.grid(row=7, column=7, sticky=W)
-ButtonNXT.grid(row=7, column=9, sticky=W)
-ButtonSV.grid(row=9, column=9)
+ButtonGN.grid(row=10, column=7, sticky=W)
+ButtonPRV.grid(row=8, column=7, sticky=W)
+ButtonNXT.grid(row=8, column=9, sticky=W)
+ButtonSV.grid(row=10, column=9)
 
 #----------- Table data -----------#
 root.a = 0                             # variable to pass to the class for positioning the table
@@ -492,7 +510,7 @@ n.bind("<<NotebookTabChanged>>", handle_tab_changed)    # detects the active tab
 #-------------------- Info right bar --------------------#
 
 InfoLines = Label(f1, relief=SUNKEN, width=30, textvariable = label_var_InfoLines, anchor=W, justify=LEFT)
-InfoLines.grid(row=11, column=13, sticky=W+N+E)
+InfoLines.grid(row=12, column=13, sticky=W+N+E)
 
 #-------------------- Status bar --------------------#
 statusFrame = Frame(root)
@@ -500,5 +518,4 @@ statusFrame.pack(side=BOTTOM, fill=X)
 status = Label(statusFrame, relief=SUNKEN, anchor=W, textvariable = label_status)
 status.pack(fill=X)
 
-# if __name__ == "--main__":
 root.mainloop()
