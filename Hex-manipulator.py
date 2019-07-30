@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 # ------------------- Hex file tool -----------------------------#
 # Creates a new Hex file(s) from a source HEX file, replaces     #
 # the device serial and MAC addresses then generates a checksum  #
@@ -330,6 +330,8 @@ def SaveToHex():
         label_status.set("Please Generate New Hex file first")
 def Nothingfunc():
     print('Nothing')
+def DebugToolBar():
+    print('Debuged')
 #-------------------- Menu --------------------#
 menu = Menu(root)
 root.config(menu=menu)
@@ -346,6 +348,7 @@ Ssett = PhotoImage(file="saveSett.png")
 Dsett = PhotoImage(file="delSett.png")
 CFields = PhotoImage(file="clear.png")
 Loadsett = PhotoImage(file="load.png")
+
 
 toolbar = Frame(root, width="500", pady=4, bg="#6bb2c6")
 # toolbar.configure(pady=(0,10))
@@ -372,6 +375,13 @@ ClearFieldsTooltip = tooltip.CreateToolTip(ClearFields, "Clear Fields")
 
 label_toolBar = tk.Label(toolbar, textvariable = label_tool_var, bg="#6bb2c6", width=25, padx=3)
 label_toolBar.grid(row=0, column=5)
+
+# ---------------------------- # DEBUG BUTTON # --------------------------
+debugimg =  PhotoImage(file="debug.png")
+Debug = Button(toolbar, image=debugimg, command=DebugToolBar)
+Debug.grid(row=0, column=12, padx=50, sticky=W)
+DebugTooltip = tooltip.CreateToolTip(Debug, "You don't need this it is for debuging purpose ;)")
+# -----------------------------------------------------------------
 
 toolbar.pack(side=TOP, fill=X)
 #-------------------- Page Header --------------------#
