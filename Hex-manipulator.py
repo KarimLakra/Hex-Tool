@@ -261,7 +261,7 @@ def NextPrevSerial(op):
 def generatHex():
     fo = pathSource.get()
     if not os.path.exists(fo):
-        missingEntry("The path to the Source file is wrong or the file does not exist!")
+        missingEntry("The location to the Source file is not available or the file does not exist!")
         err = True
         pathSource.focus_set()
     elif serialSource.get() == "":
@@ -301,9 +301,9 @@ def randomizCor():                              # random hex color generator
 
 def SaveToHex():
     if root.Flines != "":
-        fi = pathNewHx.get()
-        if not os.path.exists(fi):
-            missingEntry("The path to the Destination file seems not correct. Use the button to select a correct path.")
+        fiP = pathNewHx.get()
+        if not os.path.exists(fiP):
+            missingEntry("The location to the Destination file is not available. Use the button to select a correct Location.")
             pathNewHx.focus_set()
         else:
             SaveToHex = os.path.join(pathNewHx.get(), serialDestination.get()+".hex")
@@ -321,6 +321,8 @@ def SaveToHex():
                 else:
                     fo.write(root.Flines[i])
             fo.close()
+            status.config(bg=randomizCor())
+            label_status.set("A new Hex file was successfully generated")
 
 
     else:
