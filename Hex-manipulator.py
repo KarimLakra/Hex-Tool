@@ -15,9 +15,17 @@ import hexLineAnalyzer
 import random
 import tooltip
 
+# --------- Create config file if there is not --------#
+currdir = os.getcwd()
+if not os.path.exists('setting'):
+    file_object = open('setting', 'w')
+    file_object.write('')
+    file_object.close()
+
+
 #-------------------- Main window --------------------#
 root = tk.Tk()
-root.wm_title("Hex files tool")
+root.wm_title("Hex files tool V1.0")
 root.geometry("1450x700")
 
 label_tool_var = tk.StringVar() #update label tool bar
@@ -101,6 +109,14 @@ tbl_list2 = [
 
 
 #-------------------- Functions --------------------#
+def resource_path(relative_path):
+# Get absolute path to resource, works for dev and for PyInstaller
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+Logo = resource_path('hex.ico')
+root.iconbitmap(Logo)
+
 def loadSetting():
     global ConfigData
 
@@ -167,7 +183,8 @@ def deleteSetting():
     label_tool_var.set('Setting deleted')
 
 def quitfunc():
-    quit()
+    # quit()            # Not working after creating exe with  pyinstaller
+    sys.exit()
 def MsgBox(a,b):
     tkinter.messagebox.showinfo(a,b)
 def dirDialog():
@@ -344,11 +361,10 @@ helpMenu = Menu(menu, tearoff=False)
 menu.add_cascade(label="Help", menu = helpMenu)
 helpMenu.add_command(label="About", command = lambda: MsgBox("About Hex-Manipulator", "Hex-Manipulator v1.0\n contact: karimlakra@hotmail.com"))
 #-------------------- Toolbar --------------------#
-Ssett = PhotoImage(file="saveSett.png")
-Dsett = PhotoImage(file="delSett.png")
-CFields = PhotoImage(file="clear.png")
-Loadsett = PhotoImage(file="load.png")
-
+Ssett = PhotoImage(file=resource_path("saveSett.png"))
+Dsett = PhotoImage(file=resource_path("delSett.png"))
+CFields = PhotoImage(file=resource_path("clear.png"))
+Loadsett = PhotoImage(file=resource_path("load.png"))
 
 toolbar = Frame(root, width="500", pady=4, bg="#6bb2c6")
 # toolbar.configure(pady=(0,10))
@@ -377,7 +393,7 @@ label_toolBar = tk.Label(toolbar, textvariable = label_tool_var, bg="#6bb2c6", w
 label_toolBar.grid(row=0, column=5)
 
 # ---------------------------- # DEBUG BUTTON # --------------------------
-debugimg =  PhotoImage(file="debug.png")
+debugimg =  PhotoImage(file=resource_path("debug.png"))
 Debug = Button(toolbar, image=debugimg, command=DebugToolBar)
 Debug.grid(row=0, column=12, padx=50, sticky=W)
 DebugTooltip = tooltip.CreateToolTip(Debug, "You don't need this it is for debuging purpose ;)")
@@ -399,7 +415,8 @@ n.add(f1, text='Generator')
 n.add(f2, text ='Verificator')
 
 #----------- Labels/Buttons Source -----------#
-folderpic = PhotoImage(file="folder.png")
+folderpic = PhotoImage(file=resource_path("folder.png"))
+
 mhfp = Label(f1, text='Source hex file path', bg='#a89999', fg='white')
 mhfp.grid(row=0, sticky=W)
 
