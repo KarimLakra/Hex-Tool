@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['Hex-manipulator.py'],
-             pathex=['D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe'],
+             pathex=['C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -15,13 +15,13 @@ a = Analysis(['Hex-manipulator.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
-a.datas += [('hex.ico', 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\hex.ico', 'DATA'),
-          ('clear.png', 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\clear.png', 'DATA'),\
-          ('debug.png', 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\debug.png', 'DATA'),\
-          ('delSett.png', 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\delSett.png', 'DATA'),\
-          ('folder.png', 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\folder.png', 'DATA'),\
-          ('load.png', 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\load.png', 'DATA'),\
-          ('saveSett.png', 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\saveSett.png', 'DATA')]
+a.datas += [('hex.ico', 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\hex.ico', 'DATA'),
+          ('clear.png', 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\clear.png', 'DATA'),\
+          ('debug.png', 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\debug.png', 'DATA'),\
+          ('delSett.png', 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\delSett.png', 'DATA'),\
+          ('folder.png', 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\folder.png', 'DATA'),\
+          ('load.png', 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\load.png', 'DATA'),\
+          ('saveSett.png', 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\saveSett.png', 'DATA')]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
@@ -37,4 +37,4 @@ exe = EXE(pyz,
           upx_exclude=[],
           runtime_tmpdir=None,
           console=False,
-          icon = 'D:\\Python_scripts\\2019-07-26_pyHEX\\HEX-Tool-exe\\hex.ico' )
+          icon = 'C://Users//Ideapad//AppData//Local//Packages//CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc//LocalState//rootfs//home//kardes//ciptec-Git-projects//Hex-Tool\\hex.ico' )

@@ -1,0 +1,6 @@
+- Generate n file entry, how many file needed to be generated
+- Check that the entries serial and MAC exists in the source file.
+- scan a file by checking each line searching for checksum errors
+- compare files
+- string to hex converter Entry
+- Display the whole file and allow a check line by line, show infos about the line by click
