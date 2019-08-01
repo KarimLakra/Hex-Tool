@@ -393,10 +393,10 @@ label_toolBar = tk.Label(toolbar, textvariable = label_tool_var, bg="#6bb2c6", w
 label_toolBar.grid(row=0, column=5)
 
 # ---------------------------- # DEBUG BUTTON # --------------------------
-debugimg =  PhotoImage(file=resource_path("debug.png"))
-Debug = Button(toolbar, image=debugimg, command=DebugToolBar)
-Debug.grid(row=0, column=12, padx=50, sticky=W)
-DebugTooltip = tooltip.CreateToolTip(Debug, "You don't need this it is for debuging purpose ;)")
+# debugimg =  PhotoImage(file=resource_path("debug.png"))
+# Debug = Button(toolbar, image=debugimg, command=DebugToolBar)
+# Debug.grid(row=0, column=12, padx=50, sticky=W)
+# DebugTooltip = tooltip.CreateToolTip(Debug, "You don't need this it is for debuging purpose ;)")
 # -----------------------------------------------------------------
 
 toolbar.pack(side=TOP, fill=X)
@@ -457,9 +457,11 @@ MACSource.insert(0, ConfigData[4])                        # Mac addr source
 
 f1.grid_rowconfigure(7, minsize=15)
 
-# ButtonLS = Button(f1, text="Load Source HEX", width=15, height=2,
-#     command=lambda:loadLines(serialSource.get(),label_var_HOS, pathSource, SH_listbox, "R"))
-# ButtonLS.grid(row=7, column=0, sticky=W)
+Nfile = Label(f1, text='N files to generate')
+Nfile.grid(row=8, column=0, sticky=W+S)
+NfileEntry = Entry(f1)#, width=55)
+NfileEntry.grid(row=9, sticky=W)
+NfileEntry.insert(0, "1") # ConfigData[6])
 
 f1.grid_rowconfigure(9, minsize=15)
 f1.grid_rowconfigure(11, minsize=15)
