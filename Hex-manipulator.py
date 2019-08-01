@@ -25,7 +25,7 @@ if not os.path.exists('setting'):
 
 #-------------------- Main window --------------------#
 root = tk.Tk()
-root.wm_title("Hex files tool V1.0")
+root.wm_title("Hex manipulator V1.0")
 root.geometry("1450x700")
 
 label_tool_var = tk.StringVar() #update label tool bar
