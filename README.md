@@ -28,4 +28,8 @@ GUI Description From Top to Bottom:
   - two list boxes displaying the modified lines, by double clicking on a line you get information in a box on the right about what each part of the line and what it means with a checksum verification.
   - Finally a status bar that interact with the user, it is useful to display errors and successful operation, the bar is painted  with different color each time an new operation happens.
     
-Special thanks to Thanks to Thomas Fischl from his website I copied the script to generate a checksum, he made a useful "HEX file checksum online calculator" here: https://www.fischl.de/hex_checksum_calculator/
+A Special Thanks to Thomas Fischl from his website I copied the script to generate a checksum, he made a useful "HEX file checksum online calculator", and https://stackoverflow.com which is the best place for every step for programmers.
+
+References:
+https://www.fischl.de/hex_checksum_calculator/
+https://en.wikipedia.org/wiki/Intel_HEX
