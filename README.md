@@ -39,5 +39,4 @@ A Special Thanks to Thomas Fischl from his website I copied the script to genera
 References:
 
   <a href="https://www.fischl.de/hex_checksum_calculator/">hex checksum calculator</a>
-
   <a href="https://en.wikipedia.org/wiki/Intel_HEX">Intel HEX</a>
