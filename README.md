@@ -20,7 +20,8 @@ GUI Description From Top to Bottom:
   
  <li>delete the config.</li>
   
- <li>clear all fields.<li><ul>
+ <li>clear all fields.</li>
+ <ul></li>
 
   <li>the input fields are necessary to generate the files, and a folder buttons to open the source file, and open to destination folder where the files will be saved when generated. Any important filed left empty, an error will be showen in the satatus bar in the bottom.</li>
   <li>two buttons to automatically decrement/increment the destination file serial number and MAC(I linked the buttons to the generate function to generate the destination file, so the user just press Save to save it).</li>
