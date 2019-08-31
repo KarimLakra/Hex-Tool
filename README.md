@@ -1,4 +1,4 @@
-<b>A tool for Intel HEX file using python3</b>
+<h2><b>A tool for Intel HEX file using python3</b></h2>
 
 <p>
 	This GUI is made using tkinter module, it is adapted to work both on Linux and Windows.</p>
@@ -38,6 +38,6 @@ A Special Thanks to Thomas Fischl from his website I copied the script to genera
 </p>
         References:
 
-        <a href="https://www.fischl.de/hex_checksum_calculator/">hex checksum calculator</a>
+        https://www.fischl.de/hex_checksum_calculator/
 
-        <a href="https://en.wikipedia.org/wiki/Intel_HEX">Intel HEX</a>
+        https://en.wikipedia.org/wiki/Intel_HEX
