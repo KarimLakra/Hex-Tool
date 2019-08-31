@@ -36,8 +36,8 @@
 A Special Thanks to Thomas Fischl from his website I copied the script to generate a checksum, he made a useful "HEX file checksum online calculator", and https://stackoverflow.com community which is the best place for every step for programmers.
 
 </p>
-        References:
+References:
 
-        https://www.fischl.de/hex_checksum_calculator/
+  <a href="https://www.fischl.de/hex_checksum_calculator/">hex checksum calculator</a>
 
-        https://en.wikipedia.org/wiki/Intel_HEX
+  <a href="https://en.wikipedia.org/wiki/Intel_HEX">Intel HEX</a>
